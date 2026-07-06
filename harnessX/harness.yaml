@@ -1,0 +1,212 @@
+version: "1.0"
+constitution: constitution.md
+profiles:
+  lite:
+    phases:
+      - propose
+      - apply
+      - archive
+    suites:
+      apply: fast-lite
+  standard:
+    phases:
+      - propose
+      - design
+      - spec
+      - plan
+      - apply
+      - verify
+      - archive
+    suites:
+      spec: fast
+      apply: fast
+      verify: verification
+  strict:
+    phases:
+      - explore
+      - propose
+      - design
+      - spec
+      - plan
+      - apply
+      - verify
+      - archive
+    suites:
+      spec: fast
+      apply: fast
+      verify: verification-strict
+suites:
+  fast-lite:
+    - spec-validate
+  fast:
+    - spec-validate
+  verification:
+    - spec-validate
+    - spec-trace
+    - arch-boundary
+    - perf-budget
+  verification-strict:
+    - spec-validate
+    - spec-trace
+    - ai-spec-review
+guides:
+  - id: proposal-template
+    kind: guide.template
+    execution: computational
+    phase:
+      - propose
+    source: assets/guides/proposal-template/template.md
+  - id: design-template
+    kind: guide.template
+    execution: computational
+    phase:
+      - design
+    source: assets/guides/design-template/template.md
+  - id: coding-conventions
+    kind: guide.skill
+    execution: inferential
+    phase:
+      - apply
+    source: assets/guides/coding-conventions/SKILL.md
+  - id: spec-writing
+    kind: guide.skill
+    execution: inferential
+    phase:
+      - propose
+      - spec
+    source: assets/guides/spec-writing/SKILL.md
+  - id: cmd-explore
+    kind: guide.command
+    execution: inferential
+    phase:
+      - explore
+    source: assets/commands/explore.md
+  - id: cmd-propose
+    kind: guide.command
+    execution: inferential
+    phase:
+      - propose
+    source: assets/commands/propose.md
+  - id: cmd-design
+    kind: guide.command
+    execution: inferential
+    phase:
+      - design
+    source: assets/commands/design.md
+  - id: cmd-spec
+    kind: guide.command
+    execution: inferential
+    phase:
+      - spec
+    source: assets/commands/spec.md
+  - id: cmd-plan
+    kind: guide.command
+    execution: inferential
+    phase:
+      - plan
+    source: assets/commands/plan.md
+  - id: cmd-apply
+    kind: guide.command
+    execution: inferential
+    phase:
+      - apply
+    source: assets/commands/apply.md
+  - id: cmd-verify
+    kind: guide.command
+    execution: inferential
+    phase:
+      - verify
+    source: assets/commands/verify.md
+  - id: cmd-archive
+    kind: guide.command
+    execution: inferential
+    phase:
+      - archive
+    source: assets/commands/archive.md
+  - id: api-design
+    kind: guide.skill
+    execution: inferential
+    phase:
+      - design
+      - apply
+    source: assets/bundles/api-service-cn/skills/api-design.md
+  - id: layering-rules
+    kind: guide.constraint
+    execution: computational
+    phase:
+      - apply
+      - verify
+    source: assets/bundles/api-service-cn/constraints/layering.yaml
+sensors:
+  - id: spec-validate
+    kind: sensor.script
+    execution: computational
+    phase:
+      - propose
+      - spec
+      - verify
+      - archive
+    trigger: phase
+    builtin: spec-validate
+    on_fail: block
+    max_retries: 0
+    fix_hint: 修正 delta spec 格式；确保每条 Requirement 至少有一个 Scenario，且需求文本符合 EARS 句式
+    timeout_ms: 120000
+  - id: spec-trace
+    kind: sensor.script
+    execution: computational
+    phase:
+      - verify
+    trigger: phase
+    builtin: spec-trace
+    on_fail: block
+    max_retries: 0
+    fix_hint: 为未覆盖的 Scenario 补充测试，或在测试标题中字面引用 Scenario 名称
+    timeout_ms: 120000
+  - id: ai-spec-review
+    kind: sensor.rubric
+    execution: inferential
+    phase:
+      - verify
+    trigger: phase
+    builtin: rubric
+    on_fail: warn
+    max_retries: 0
+    fix_hint: 根据 rubric 评审意见收紧规格表述，消除模糊或不可测量的需求
+    budget_tokens: 8000
+    timeout_ms: 120000
+  - id: fixture-guard
+    kind: sensor.fixture
+    execution: computational
+    trigger: file-save
+    scope:
+      - tests/fixtures/**
+    builtin: fixture-hash
+    on_fail: block
+    max_retries: 0
+    fix_hint: 已批准的 fixture 不可修改；如需变更请通过 waiver 流程重新批准
+    timeout_ms: 120000
+  - id: arch-boundary
+    kind: sensor.arch
+    execution: computational
+    phase:
+      - verify
+    trigger: phase
+    builtin: arch-boundary
+    on_fail: block
+    max_retries: 0
+    fix_hint: 调整 import，使依赖向内指向：routes → services → repositories
+    timeout_ms: 120000
+  - id: perf-budget
+    kind: sensor.budget
+    execution: computational
+    phase:
+      - verify
+    trigger: phase
+    builtin: budget
+    on_fail: warn
+    max_retries: 0
+    fix_hint: 在 design.md 中记录性能影响，或优化热点路径以满足预算
+    timeout_ms: 120000
+dependencies: []
+overrides: []
