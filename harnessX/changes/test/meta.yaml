@@ -1,0 +1,16 @@
+change: test
+status: verified
+profile: standard
+touchedDomains:
+  - test
+approvals: []
+waivers: []
+gateHistory:
+  - phase: verify
+    suite: verification
+    at: 2026-07-06T02:58:20.716Z
+    passed: false
+    logHash: 84551aefba7df022a2cc4755d1879f1c243e5be395617a34ff3d32803ec53733
+    logLines: 5
+approvedTests: {}
+contentHash: 511a961ecdb01ea72d297d2a97057856bf7e9a71dcb9c35f541eb8feb0f7578a
